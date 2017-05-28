@@ -12,28 +12,21 @@ import java.util.Map;
 public class EventHandlerFactory {
     private static Map<MessageType, EventHandler> instanceStore;
 
-    public static EventHandler getHandler(MessageType type) {
-        if (instanceStore == null) {
-            initSingletonStore();
-        }
-
-        if (type == null) {
-            return null;
-        }
-
-        if (type == MessageType.SINGLE_SALE) {
-            return instanceStore.get(MessageType.SINGLE_SALE);
-        } else if (type == MessageType.MULTI_SALE) {
-            return instanceStore.get(MessageType.MULTI_SALE);
-        } else if (type == MessageType.ADJUSTMENT) {
-            return instanceStore.get(MessageType.ADJUSTMENT);
-        } else {
-            System.err.println("Unrecognized event type " + type + ". Ignoring the event");
-            return null;
-        }
+    static {
+        initSingletonStore();
     }
 
-    // To prevent creation of a number of unused classes
+    public static EventHandler getHandler(MessageType type) {
+        final EventHandler handler = instanceStore.get(type);
+
+        if (handler == null) {
+            System.err.println("Unrecognized event type " + type + ". Ignoring the event");
+        }
+
+        return handler;
+    }
+
+    // To prevent creation of a number of unused objects
     private static void initSingletonStore() {
         instanceStore = new HashMap<>();
         instanceStore.put(MessageType.SINGLE_SALE, new SingleSaleEventHandler());
